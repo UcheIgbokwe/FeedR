@@ -1,4 +1,4 @@
-@gatewayUrl = http://localhost:5000
+@gatewayUrl = http://localhost:8080
 @aggregatorUrl = http://localhost:5010
 @notifierUrl = http://localhost:5020
 @newsFeedUrl = http://localhost:5030
