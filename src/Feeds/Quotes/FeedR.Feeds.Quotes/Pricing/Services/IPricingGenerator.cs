@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FeedR.Feeds.Quotes.Pricing.Models;
 
 namespace FeedR.Feeds.Quotes.Pricing.Services
 {
-    public interface IPricingGenerator
+    internal interface IPricingGenerator
     {
-        Task StartAsync();
+        IAsyncEnumerable<CurrencyPair> StartAsync();
         Task StopAsync();
     }
 
-    public class PricingGenerator : IPricingGenerator
+    internal class PricingGenerator : IPricingGenerator
     {
         private readonly Random _random = new();
         private readonly ILogger<PricingGenerator> _logger;
@@ -27,7 +28,7 @@ namespace FeedR.Feeds.Quotes.Pricing.Services
             ["EURPLN"] = 4.62M,
         };
         private bool _isRunning;
-        public async Task StartAsync()
+        public async IAsyncEnumerable<CurrencyPair> StartAsync()
         {
             _isRunning = true;
             while(_isRunning)
@@ -36,15 +37,17 @@ namespace FeedR.Feeds.Quotes.Pricing.Services
                 {
                     if(!_isRunning)
                     {
-                        return;
+                        yield break;
                     }
 
                     var tick = NextTick();
                     var newPricing = pricing + tick;
                     _currencyPairs[symbol] = newPricing;
 
+                    var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     _logger.LogInformation("Update Pricing for {symbol}, {pricing:F} -> {newPricing:F}", symbol, pricing, newPricing);
-
+                    var currencyPair = new CurrencyPair(symbol, newPricing, timestamp);
+                    yield return currencyPair;
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
             }
