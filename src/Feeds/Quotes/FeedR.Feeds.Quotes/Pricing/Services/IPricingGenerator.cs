@@ -8,6 +8,7 @@ namespace FeedR.Feeds.Quotes.Pricing.Services
 {
     internal interface IPricingGenerator
     {
+        IEnumerable<string> GetSymbols();
         IAsyncEnumerable<CurrencyPair> StartAsync();
         Task StopAsync();
     }
@@ -64,6 +65,11 @@ namespace FeedR.Feeds.Quotes.Pricing.Services
             var sign = _random.Next(0, 2) == 0 ? -1 : 1;
             var tick = _random.NextDouble() / 20;
             return (decimal) (sign * tick);
+        }
+
+        public IEnumerable<string> GetSymbols()
+        {
+            return _currencyPairs.Keys;
         }
     }
 }
